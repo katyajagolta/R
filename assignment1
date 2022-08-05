@@ -1,0 +1,97 @@
+---
+title: "SeaUrchinAssigment"
+author: "Angad"
+date: "2022-08-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 
+# Step 0: Data cleaning
+
+```{r}
+install.packages("tidyverse")
+install.packages("rstantools")
+```
+
+```{r include=FALSE, results='hide'}
+seaurchins <- read.csv("/Users/angad/Desktop/Sea_urchins.csv")
+summary(seaurchins)
+```
+
+```{r}
+# Converting into factors
+seaurchins$Site <- factor(seaurchins$Site)
+seaurchins$Area <- factor(seaurchins$Area)
+seaurchins$Month <- factor(seaurchins$Month)
+seaurchins$TD <- factor(seaurchins$TD)
+```
+
+```{r}
+# Collapsing 
+library(tidyverse)
+seaurchins$Area <- fct_collapse(seaurchins$Area, High = c("A", "B"), Low = c("C", "D"))
+summary(seaurchins$Area)
+# Areas with high and low fishing pressure.
+```
+
+# Step 1 - Finding the outliers 
+
+```{r}
+# Finding the outliers for GSI boxplot and dotchart. 
+x <- seaurchins$GSI
+boxplot(x)
+dotchart(x)
+# There are outliers, now we perform sensitivity analysis to replace outliers with cut-off value.
+```
+
+```{r}
+# Sensitivity Analysis
+library(tidyverse)
+Q3 <- quantile(seaurchins$GSI, probs = .75, na.rm = TRUE)
+IQR <- IQR(seaurchins$GSI, na.rm = TRUE)
+seaurchins1 <- subset(seaurchins$GSI, seaurchins$GSI < (Q3 + 1.5*IQR))
+```
+
+```{r}
+boxplot(seaurchins1)
+# Outliers have been eliminated.
+```
+
+# Step 2 - Homogeneity of variance
+
+```{r}
+install.packages("lattice")
+```
+
+```{r}
+library(tidyverse)
+seaurchins$Area <- fct_collapse(seaurchins$Area, High = c("A", "B"), Low = c("C", "D"))
+summary(seaurchins$Area)
+library(lattice)
+bwplot(seaurchins$GSI ~ seaurchins$Area | seaurchins$Site)
+# Equal variances within each group.
+```
+
+```{r}
+# Creating residual plot vs fitted plot for TD
+model <- lm(seaurchins$GSI ~ seaurchins$TD, data = seaurchins)
+plot(model)
+```
+
+# Step 3 - Normality 
+
+```{r}
+# Checking Normality
+x <- seaurchins$GSI
+{hist(x, freq = FALSE)
+  curve(dnorm(x, mean = mean(x), sd = sd(x)), add = TRUE, type ="l")}
+
+#QQ Normality Plot
+qqnorm(x)
+
+# The distribution is normal and thus parametric tests can be done.
+```
