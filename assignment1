@@ -95,3 +95,32 @@ qqnorm(x)
 
 # The distribution is normal and thus parametric tests can be done.
 ```
+# Step 4 is for count data and does not apply here.
+
+# Step 5 - Collinearity 
+
+```{r}
+install.packages("caTools")
+install.packages("corrplot")
+install.packages("MASS")
+install.packages("quantmod")
+```
+
+```{r}
+library(caTools)
+library(quantmod)
+library(MASS)
+library(corrplot)
+```
+
+```{r}
+seaurchinsss <- data.frame(seaurchins)
+model_su <- lm(seaurchins$GSI ~ seaurchins$TD + seaurchins$TW, data = seaurchinsss)
+summary(model_su)
+```
+
+```{r}
+install.packages("car")
+library(car)
+vif(model_su)
+```
