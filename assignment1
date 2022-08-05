@@ -100,6 +100,12 @@ qqnorm(x)
 # Step 5 - Collinearity 
 
 ```{r}
+seaurchins$TW = as.numeric(seaurchins$TW)
+x <- cbind(seaurchins$GSI, seaurchins$TD, seaurchins$TW)
+pairs(x)
+```
+
+```{r}
 install.packages("caTools")
 install.packages("corrplot")
 install.packages("MASS")
